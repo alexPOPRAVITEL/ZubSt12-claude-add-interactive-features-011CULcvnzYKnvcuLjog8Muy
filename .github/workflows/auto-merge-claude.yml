@@ -1,0 +1,98 @@
+name: Auto-merge Claude branches to main
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set branch name
+        id: vars
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Try merge into main or create PR
+        uses: actions/github-script@v7
+        env:
+          BRANCH: ${{ steps.vars.outputs.branch }}
+          REPO_PAT: ${{ secrets.REPO_PAT }} # optional: personal access token with repo scope
+        with:
+          script: |
+            const branch = process.env.BRANCH;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const token = process.env.REPO_PAT || process.env.GITHUB_TOKEN;
+            const client = github.getOctokit(token);
+
+            core.info(`Attempting to merge ${branch} into main`);
+
+            try {
+              const merge = await client.rest.repos.merge({
+                owner,
+                repo,
+                base: 'main',
+                head: branch
+              });
+              core.info(`Merged ${branch} into main: ${merge.data.sha}`);
+              return;
+            } catch (err) {
+              core.info(`Direct merge failed: ${err.message}`);
+            }
+
+            // Find existing PR
+            const list = await client.rest.pulls.list({
+              owner,
+              repo,
+              head: `${owner}:${branch}`,
+              base: 'main',
+              state: 'open'
+            });
+
+            if (list.data.length > 0) {
+              core.info(`Existing PR #${list.data[0].number} found for ${branch}`);
+              return;
+            }
+
+            // Create PR
+            const title = `Auto: merge ${branch} → main`;
+            const body = `This pull request was created automatically to merge changes from **${branch}** into **main**.\n\nIf there are conflicts, please resolve them and merge.`;
+            const pr = await client.rest.pulls.create({
+              owner,
+              repo,
+              head: branch,
+              base: 'main',
+              title,
+              body
+            });
+            core.info(`Created PR #${pr.data.number} for ${branch}`);
+
+            // Try to enable auto-merge (requires PAT with repo scope in REPO_PAT)
+            if (process.env.REPO_PAT) {
+              try {
+                await client.rest.pulls.enableAutoMerge({
+                  owner,
+                  repo,
+                  pull_number: pr.data.number,
+                  merge_method: 'merge'
+                });
+                core.info(`Enabled auto-merge on PR #${pr.data.number}`);
+              } catch (err) {
+                core.info(`Could not enable auto-merge: ${err.message}`);
+              }
+            } else {
+              core.info('No REPO_PAT provided — set a repo secret REPO_PAT to allow enabling auto-merge automatically.');
+            }

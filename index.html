@@ -2,12 +2,67 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive Features App</title>
+    <link rel="icon" type="image/png" href="https://files.salebot.pro/uploads/file_item/file/575843/ЗУБНАЯ_СТАНЦИЯ__6_.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#002B49" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Зубная Станция" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
+    <title>Зубная Станция - Семейная стоматология в Барнауле | Лечение зубов, имплантация, брекеты</title>
+    <meta name="description" content="Семейная стоматология в Барнауле. Лечение зубов, имплантация, исправление прикуса. Современное оборудование, опытные врачи, доступные цены. Запись: +7-961-978-54-54" />
+    <meta name="keywords" content="стоматология Барнаул, лечение зубов, имплантация, брекеты, детский стоматолог, семейная стоматология, зубная станция" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="telegram:channel" content="@zubnaya_stanciya" />
+    <meta name="telegram:bot" content="@zubnaya_stanciya_bot" />
+    <meta property="og:title" content="Зубная Станция - Семейная стоматология в Барнауле" />
+    <meta property="og:description" content="Качественная стоматологическая помощь для всей семьи. Современное оборудование, опытные врачи, доступные цены." />
+    <meta property="og:image" content="https://files.salebot.pro/uploads/file_item/file/575843/ЗУБНАЯ_СТАНЦИЯ__6_.png" />
+    <meta property="og:url" content="https://zubst.ru" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dentist",
+      "name": "Зубная Станция",
+      "description": "Семейная стоматология в Барнауле",
+      "url": "https://zubst.ru",
+      "telephone": "+7-961-978-54-54",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. Панфиловцев, 14",
+        "addressLocality": "Барнаул",
+        "addressRegion": "Алтайский край",
+        "postalCode": "656037",
+        "addressCountry": "RU"
+      },
+      "openingHours": [
+        "Mo-Fr 09:00-20:00",
+        "Sa-Su 00:00-00:00"
+      ],
+      "priceRange": "$$",
+      "sameAs": [
+        "https://vk.com/zubst_barnaul",
+        "https://t.me/zubst_barnaul"
+      ]
+    }
+    </script>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XCSLJQFJYF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XCSLJQFJYF');
+    </script>
   </head>
-  <body>
+  <body class="safe-area-padding">
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

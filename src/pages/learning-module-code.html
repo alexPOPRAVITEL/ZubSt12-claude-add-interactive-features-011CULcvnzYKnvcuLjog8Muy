@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивная Платформа Обучения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Шапка с прогрессом */
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .course-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        /* Прогресс бар */
+        .progress-container {
+            margin-top: 15px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            transition: width 0.5s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 5px;
+        }
+
+        .progress-milestone {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Основной контент */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            gap: 20px;
+        }
+
+        /* Боковая навигация */
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .module {
+            margin-bottom: 20px;
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .module-header:hover {
+            background: #f3f4f6;
+        }
+
+        .module-title {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .module-progress {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .lessons {
+            margin-left: 10px;
+        }
+
+        .lesson {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+        }
+
+        .lesson:hover {
+            background: var(--light);
+        }
+
+        .lesson.active {
+            background: #eef2ff;
+            color: var(--primary);
+        }
+
+        .lesson.completed .lesson-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .lesson-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .lesson-title {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .lesson-duration {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        /* Область контента */
+        .content-area {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .lesson-current {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: var(--light);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .content-type-tabs {
+            display: flex;
+            gap: 15px;
+            padding: 0 25px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .content-tab {
+            padding: 12px 0;
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .content-tab.active {
+            color: var(--primary);
+        }
+
+        .content-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .content-body {
+            padding: 25px;
+            min-height: 500px;
+        }
+
+        /* Видео плеер */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            transition: transform 0.3s;
+        }
+
+        .video-overlay:hover .play-button {
+            transform: scale(1.1);
+        }
+
+        .video-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .video-stat {
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* Текстовый контент */
+        .text-content {
+            line-height: 1.8;
+            color: #374151;
+        }
+
+        .text-content h2 {
+            margin: 20px 0 10px;
+            color: var(--dark);
+        }
+
+        .text-content p {
+            margin-bottom: 15px;
+        }
+
+        .text-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        /* Интерактивные элементы */
+        .interactive-quiz {
+            padding: 20px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .quiz-submit {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-submit:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Боковая панель со статистикой */
+        .stats-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .stats-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .achievement-desc {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .time-tracker {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .time-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        .time-label {
+            color: #6b7280;
+        }
+
+        .time-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .activity-graph {
+            margin-top: 20px;
+            height: 100px;
+            background: var(--light);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-bar {
+            position: absolute;
+            bottom: 0;
+            width: 12%;
+            background: var(--primary);
+            transition: height 0.5s ease;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 250px 1fr;
+            }
+            
+            .stats-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <div class="header">
+            <div class="header-top">
+                <h1 class="course-title">📚 Основы веб-разработки</h1>
+                <div class="user-info">
+                    <div class="user-stats">
+                        <div class="stat">
+                            <div class="stat-value">75%</div>
+                            <div class="stat-label">Прогресс</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Уроков</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">4.5h</div>
+                            <div class="stat-label">Времени</div>
+                        </div>
+                    </div>
+                    <div class="user-avatar">АК</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-info">
+                    <span>Модуль 3 из 4 • Урок 8 из 16</span>
+                    <span>75% завершено</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%">
+                        <div class="progress-milestone" style="left: 25%"></div>
+                        <div class="progress-milestone" style="left: 50%"></div>
+                        <div class="progress-milestone" style="left: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="main-layout">
+            <!-- Боковая навигация -->
+            <aside class="sidebar">
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">📘 Модуль 1: Введение</span>
+                        <span class="module-progress">100%</span>
+                    </div>
+                    <div class="lessons">
+                        <div class="lesson completed">
+                            <div class="lesson-icon">✓</div>
+                            <div class="lesson-title">Что такое веб?</div>
+                            <div class="lesson-duration">15м</div>
+                        </div>
+                        <div class="lesson completed">
+                            <div class="lesson-icon">✓</div>
+                            <div class="lesson-title">Основы HTML</div>
+                            <div class="lesson-duration">20м</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">📗 Модуль 2: HTML & CSS</span>
+                        <span class="module-progress">100%</span>
+                    </div>
+                    <div class="lessons">
+                        <div class="lesson completed">
+                            <div class="lesson-icon">✓</div>
+                            <div class="lesson-title">Структура документа</div>
+                            <div class="lesson-duration">25м</div>
+                        </div>
+                        <div class="lesson completed">
+                            <div class="lesson-icon">✓</div>
+                            <div class="lesson-title">Стилизация с CSS</div>
+                            <div class="lesson-duration">30м</div>
+                        </div>
+                        <div class="lesson completed">
+                            <div class="lesson-icon">✓</div>
+                            <div class="lesson-title">Flexbox и Grid</div>
+                            <div class="lesson-duration">35м</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">📙 Модуль 3: JavaScript</span>
+                        <span class="module-progress">60%</span>
+                    </div>
+                    <div class="lessons">
+                        <div class="lesson completed">
+                            <div class="lesson-icon">✓</div>
+                            <div class="lesson-title">Основы JS</div>
+                            <div class="lesson-duration">40м</div>
+                        </div>
+                        <div class="lesson completed">
+                            <div class="lesson-icon">✓</div>
+                            <div class="lesson-title">DOM манипуляции</div>
+                            <div class="lesson-duration">35м</div>
+                        </div>
+                        <div class="lesson active">
+                            <div class="lesson-icon">8</div>
+                            <div class="lesson-title">События и обработчики</div>
+                            <div class="lesson-duration">30м</div>
+                        </div>
+                        <div class="lesson">
+                            <div class="lesson-icon">9</div>
+                            <div class="lesson-title">Асинхронный JS</div>
+                            <div class="lesson-duration">45м</div>
+                        </div>
+                        <div class="lesson">
+                            <div class="lesson-icon">10</div>
+                            <div class="lesson-title">Проект: Todo App</div>
+                            <div class="lesson-duration">60м</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">📕 Модуль 4: Проект</span>
+                        <span class="module-progress">0%</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Область контента -->
+            <main class="content-area">
+                <div class="content-header">
+                    <div class="lesson-nav">
+                        <h2 class="lesson-current">События и обработчики в JavaScript</h2>
+                        <div class="nav-buttons">
+                            <button class="nav-btn" onclick="previousLesson()">← Предыдущий</button>
+                            <button class="nav-btn" onclick="nextLesson()">Следующий →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-type-tabs">
+                    <button class="content-tab active" onclick="switchContentTab(this, 'video')">
+                        🎥 Видео
+                    </button>
+                    <button class="content-tab" onclick="switchContentTab(this, 'text')">
+                        📖 Текст
+                    </button>
+                    <button class="content-tab" onclick="switchContentTab(this, 'practice')">
+                        💻 Практика
+                    </button>
+                    <button class="content-tab" onclick="switchContentTab(this, 'quiz')">
+                        ✅ Тест
+                    </button>
+                </div>
+
+                <div class="content-body">
+                    <!-- Видео контент -->
+                    <div id="video-content" class="content-section">
+                        <div class="video-container">
+                            <video class="video-player" id="mainVideo" controls>
+                                <source src="lesson-video.mp4" type="video/mp4">
+                            </video>
+                            <div class="video-overlay" onclick="playVideo()">
+                                <div class="play-button">▶</div>
+                            </div>
+                        </div>
+                        <div class="video-stats">
+                            <div class="video-stat">
+                                <div class="stat-value">18:45</div>
+                                <div class="stat-label">Просмотрено</div>
+                            </div>
+                            <div class="video-stat">
+                                <div class="stat-value">62%</div>
+                                <div class="stat-label">Завершено</div>
+                            </div>
+                            <div class="video-stat">
+                                <div class="stat-value">2</div>
+                                <div class="stat-label">Просмотров</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Текстовый контент -->
+                    <div id="text-content" class="content-section" style="display: none;">
+                        <div class="text-content">
+                            <h2>События в JavaScript</h2>
+                            <p>События - это сигналы, которые посылаются при выполнении определенных действий на веб-странице. JavaScript может "слушать" эти события и реагировать на них.</p>
+                            
+                            <h3>Основные типы событий:</h3>
+                            <ul>
+                                <li><strong>click</strong> - клик мыши</li>
+                                <li><strong>mouseover/mouseout</strong> - наведение/уход курсора</li>
+                                <li><strong>keydown/keyup</strong> - нажатие/отпускание клавиши</li>
+                                <li><strong>submit</strong> - отправка формы</li>
+                                <li><strong>load</strong> - загрузка страницы</li>
+                            </ul>
+
+                            <h3>Добавление обработчиков событий</h3>
+                            <div class="code-block">
+// Способ 1: addEventListener
+button.addEventListener('click', function() {
+    console.log('Кнопка нажата!');
+});
+
+// Способ 2: onclick свойство
+button.onclick = function() {
+    console.log('Кнопка нажата!');
+};
+
+// Способ 3: HTML атрибут
+// &lt;button onclick="handleClick()"&gt;Нажми меня&lt;/button&gt;
+                            </div>
+
+                            <h3>Event объект</h3>
+                            <p>При срабатывании события, обработчик получает объект события с полезной информацией:</p>
+                            <div class="code-block">
+button.addEventListener('click', function(event) {
+    console.log(event.type);       // 'click'
+    console.log(event.target);     // элемент, на котором произошло событие
+    console.log(event.clientX);    // координата X курсора
+    console.log(event.clientY);    // координата Y курсора
+});
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Практика -->
+                    <div id="practice-content" class="content-section" style="display: none;">
+                        <h3>Практическое задание: Интерактивная кнопка</h3>
+                        <p>Создайте кнопку, которая меняет цвет при наведении и показывает количество кликов.</p>
+                        
+                        <div style="margin: 30px 0; padding: 30px; background: #f9fafb; border-radius: 8px; text-align: center;">
+                            <button id="practiceBtn" style="padding: 15px 30px; font-size: 18px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Кликов: 0
+                            </button>
+                            <p id="hoverStatus" style="margin-top: 20px; color: #6b7280;">Наведите курсор на кнопку</p>
+                        </div>
+
+                        <div class="code-block">
+// Ваш код здесь:
+const button = document.getElementById('practiceBtn');
+let clickCount = 0;
+
+// Добавьте обработчики для:
+// 1. Подсчета кликов
+// 2. Изменения цвета при наведении
+// 3. Отображения статуса наведения
+                        </div>
+                    </div>
+
+                    <!-- Тест -->
+                    <div id="quiz-content" class="content-section" style="display: none;">
+                        <div class="interactive-quiz">
+                            <div class="quiz-question">
+                                Вопрос 1 из 5: Какой метод является предпочтительным для добавления обработчиков событий?
+                            </div>
+                            <div class="quiz-options">
+                                <div class="quiz-option" onclick="selectOption(this)">
+                                    HTML атрибут onclick
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this)">
+                                    Свойство element.onclick
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this)">
+                                    addEventListener()
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this)">
+                                    Все методы одинаково хороши
+                                </div>
+                            </div>
+                            <button class="quiz-submit" onclick="submitAnswer()">Проверить ответ</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Панель статистики -->
+            <aside class="stats-panel">
+                <h3 class="stats-header">📊 Ваша статистика</h3>
+                
+                <div class="achievement">
+                    <div class="achievement-icon">🏆</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">Быстрый старт</div>
+                        <div class="achievement-desc">Завершите 5 уроков за день</div>
+                    </div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="achievement-icon">🔥</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">В ударе!</div>
+                        <div class="achievement-desc">3 дня подряд обучения</div>
+                    </div>
+                </div>
+
+                <div class="achievement">
+                    <div class="achievement-icon">⭐</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">Отличник</div>
+                        <div class="achievement-desc">100% на всех тестах</div>
+                    </div>
+                </div>
+
+                <div class="time-tracker">
+                    <h4 style="font-size: 14px; margin-bottom: 15px; color: var(--dark);">Время обучения</h4>
+                    <div class="time-stat">
+                        <span class="time-label">Сегодня</span>
+                        <span class="time-value">1ч 23м</span>
+                    </div>
+                    <div class="time-stat">
+                        <span class="time-label">Эта неделя</span>
+                        <span class="time-value">8ч 45м</span>
+                    </div>
+                    <div class="time-stat">
+                        <span class="time-label">Всего</span>
+                        <span class="time-value">24ч 30м</span>
+                    </div>
+                    
+                    <div class="activity-graph">
+                        <div class="activity-bar" style="left: 0%; height: 40%;"></div>
+                        <div class="activity-bar" style="left: 14%; height: 60%;"></div>
+                        <div class="activity-bar" style="left: 28%; height: 80%;"></div>
+                        <div class="activity-bar" style="left: 42%; height: 45%;"></div>
+                        <div class="activity-bar" style="left: 56%; height: 90%;"></div>
+                        <div class="activity-bar" style="left: 70%; height: 75%;"></div>
+                        <div class="activity-bar" style="left: 84%; height: 100%;"></div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Модальное окно завершения -->
+    <div class="modal" id="completionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                🎉 Отлично! Урок завершен
+            </div>
+            <div class="modal-body">
+                <p>Вы успешно завершили урок "События и обработчики в JavaScript"!</p>
+                <p>Ваш прогресс: <strong>76%</strong></p>
+                <p>Получено XP: <strong>+50</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Остаться</button>
+                <button class="btn btn-primary" onclick="goToNextLesson()">Следующий урок</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Система отслеживания пользователя
+        class UserTracker {
+            constructor() {
+                this.userId = this.getOrCreateUserId();
+                this.fingerprint = this.generateFingerprint();
+                this.sessionStart = Date.now();
+                this.events = [];
+                this.progress = this.loadProgress();
+                
+                this.init();
+            }
+
+            init() {
+                // Отслеживание событий
+                this.trackPageView();
+                this.trackTimeOnPage();
+                this.trackInteractions();
+                this.trackVideoProgress();
+                this.trackScrolling();
+                
+                // Отправка данных каждые 30 секунд
+                setInterval(() => this.sendAnalytics(), 30000);
+                
+                // Отправка при закрытии страницы
+                window.addEventListener('beforeunload', () => this.sendAnalytics());
+            }
+
+            getOrCreateUserId() {
+                let userId = localStorage.getItem('userId');
+                if (!userId) {
+                    userId = 'user_' + Math.random().toString(36).substr(2, 9) + Date.now();
+                    localStorage.setItem('userId', userId);
+                }
+                return userId;
+            }
+
+            generateFingerprint() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('fingerprint', 2, 2);
+                
+                const fingerprint = {
+                    canvas: canvas.toDataURL(),
+                    screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    userAgent: navigator.userAgent,
+                    plugins: Array.from(navigator.plugins).map(p => p.name).join(','),
+                    webgl: this.getWebGLFingerprint()
+                };
+                
+                return this.hashFingerprint(fingerprint);
+            }
+
+            getWebGLFingerprint() {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) return null;
+                
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                if (!debugInfo) return null;
+                
+                return {
+                    vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+                    renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+                };
+            }
+
+            hashFingerprint(data) {
+                const str = JSON.stringify(data);
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString(16);
+            }
+
+            trackPageView() {
+                this.addEvent('page_view', {
+                    url: window.location.href,
+                    referrer: document.referrer,
+                    timestamp: Date.now()
+                });
+            }
+
+            trackTimeOnPage() {
+                let timeOnPage = 0;
+                let isActive = true;
+                
+                document.addEventListener('visibilitychange', () => {
+                    isActive = !document.hidden;
+                });
+                
+                setInterval(() => {
+                    if (isActive) {
+                        timeOnPage++;
+                        this.updateProgress('timeSpent', timeOnPage);
+                    }
+                }, 1000);
+            }
+
+            trackInteractions() {
+                // Клики
+                document.addEventListener('click', (e) => {
+                    this.addEvent('click', {
+                        element: e.target.tagName,
+                        id: e.target.id,
+                        class: e.target.className,
+                        text: e.target.innerText?.substring(0, 50),
+                        x: e.clientX,
+                        y: e.clientY
+                    });
+                });
+                
+                // Наведения
+                let hoverTargets = document.querySelectorAll('.lesson, .quiz-option, button');
+                hoverTargets.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        this.addEvent('hover', {
+                            element: el.tagName,
+                            id: el.id
+                        });
+                    });
+                });
+            }
+
+            trackVideoProgress() {
+                const video = document.getElementById('mainVideo');
+                if (!video) return;
+                
+                let watchedSegments = [];
+                let lastTime = 0;
+                
+                video.addEventListener('play', () => {
+                    this.addEvent('video_play', { currentTime: video.currentTime });
+                });
+                
+                video.addEventListener('pause', () => {
+                    this.addEvent('video_pause', { 
+                        currentTime: video.currentTime,
+                        duration: video.duration,
+                        percentWatched: (video.currentTime / video.duration) * 100
+                    });
+                });
+                
+                video.addEventListener('timeupdate', () => {
+                    const currentTime = Math.floor(video.currentTime);
+                    if (currentTime > lastTime) {
+                        watchedSegments.push(currentTime);
+                        lastTime = currentTime;
+                        this.updateProgress('videoProgress', {
+                            watchedSegments: [...new Set(watchedSegments)],
+                            totalDuration: video.duration
+                        });
+                    }
+                });
+                
+                video.addEventListener('ended', () => {
+                    this.addEvent('video_complete', { duration: video.duration });
+                    this.updateProgress('completedVideos', true);
+                });
+            }
+
+            trackScrolling() {
+                let maxScroll = 0;
+                let scrollEvents = [];
+                
+                document.addEventListener('scroll', () => {
+                    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+                    if (scrollPercent > maxScroll) {
+                        maxScroll = scrollPercent;
+                        this.updateProgress('maxScroll', maxScroll);
+                    }
+                    
+                    scrollEvents.push({
+                        percent: scrollPercent,
+                        timestamp: Date.now()
+                    });
+                    
+                    // Отправляем агрегированные данные каждые 10 событий
+                    if (scrollEvents.length >= 10) {
+                        this.addEvent('scroll_batch', scrollEvents);
+                        scrollEvents = [];
+                    }
+                });
+            }
+
+            addEvent(type, data) {
+                this.events.push({
+                    type,
+                    data,
+                    timestamp: Date.now(),
+                    sessionId: this.sessionStart,
+                    userId: this.userId,
+                    fingerprint: this.fingerprint
+                });
+            }
+
+            updateProgress(key, value) {
+                if (!this.progress[key]) {
+                    this.progress[key] = value;
+                } else if (typeof value === 'object') {
+                    this.progress[key] = { ...this.progress[key], ...value };
+                } else {
+                    this.progress[key] = value;
+                }
+                this.saveProgress();
+            }
+
+            loadProgress() {
+                const saved = localStorage.getItem('userProgress');
+                return saved ? JSON.parse(saved) : {
+                    coursesStarted: [],
+                    coursesCompleted: [],
+                    lessonsCompleted: [],
+                    totalTimeSpent: 0,
+                    testScores: [],
+                    achievements: []
+                };
+            }
+
+            saveProgress() {
+                localStorage.setItem('userProgress', JSON.stringify(this.progress));
+            }
+
+            sendAnalytics() {
+                if (this.events.length === 0) return;
+                
+                const payload = {
+                    userId: this.userId,
+                    fingerprint: this.fingerprint,
+                    sessionId: this.sessionStart,
+                    events: this.events,
+                    progress: this.progress,
+                    metadata: {
+                        url: window.location.href,
+                        userAgent: navigator.userAgent,
+                        timestamp: Date.now()
+                    }
+                };
+                
+                // Отправка на сервер
+                console.log('Отправка аналитики:', payload);
+                // fetch('/api/analytics', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(payload)
+                // });
+                
+                // Очищаем события после отправки
+                this.events = [];
+            }
+        }
+
+        // Инициализация трекера
+        const tracker = new UserTracker();
+
+        // Функции интерфейса
+        function switchContentTab(tab, type) {
+            // Убираем активный класс со всех вкладок
+            document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Скрываем все секции контента
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Показываем нужную секцию
+            document.getElementById(type + '-content').style.display = 'block';
+            
+            // Отслеживаем переключение
+            tracker.addEvent('tab_switch', { tab: type });
+        }
+
+        function playVideo() {
+            const overlay = document.querySelector('.video-overlay');
+            const video = document.getElementById('mainVideo');
+            overlay.style.display = 'none';
+            video.play();
+        }
+
+        function selectOption(option) {
+            // Убираем выделение со всех опций
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            option.classList.add('selected');
+            
+            tracker.addEvent('quiz_option_select', { 
+                option: option.innerText 
+            });
+        }
+
+        function submitAnswer() {
+            const selected = document.querySelector('.quiz-option.selected');
+            if (!selected) {
+                alert('Пожалуйста, выберите ответ');
+                return;
+            }
+            
+            // Правильный ответ - addEventListener()
+            const isCorrect = selected.innerText.includes('addEventListener');
+            
+            if (isCorrect) {
+                selected.classList.add('correct');
+                alert('Правильно! addEventListener() - это рекомендуемый способ.');
+            } else {
+                selected.classList.add('incorrect');
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    if (opt.innerText.includes('addEventListener')) {
+                        opt.classList.add('correct');
+                    }
+                });
+                alert('Неправильно. Правильный ответ: addEventListener()');
+            }
+            
+            tracker.addEvent('quiz_submit', { 
+                answer: selected.innerText,
+                isCorrect: isCorrect,
+                score: isCorrect ? 100 : 0
+            });
+            
+            tracker.updateProgress('testScores', {
+                testId: 'events_quiz_1',
+                score: isCorrect ? 100 : 0,
+                timestamp: Date.now()
+            });
+        }
+
+        function nextLesson() {
+            // Показываем модальное окно завершения
+            document.getElementById('completionModal').classList.add('active');
+            
+            tracker.addEvent('lesson_complete', {
+                lessonId: 'js_events',
+                completionTime: Date.now() - tracker.sessionStart
+            });
+            
+            tracker.updateProgress('lessonsCompleted', 'js_events');
+        }
+
+        function previousLesson() {
+            tracker.addEvent('navigation', { direction: 'previous' });
+            alert('Переход к предыдущему уроку');
+        }
+
+        function closeModal() {
+            document.getElementById('completionModal').classList.remove('active');
+        }
+
+        function goToNextLesson() {
+            closeModal();
+            alert('Переход к следующему уроку: Асинхронный JavaScript');
+            // Здесь будет переход к следующему уроку
+        }
+
+        // Интерактивная практика
+        let practiceClickCount = 0;
+        const practiceBtn = document.getElementById('practiceBtn');
+        const hoverStatus = document.getElementById('hoverStatus');
+
+        if (practiceBtn) {
+            practiceBtn.addEventListener('click', function() {
+                practiceClickCount++;
+                this.innerText = `Кликов: ${practiceClickCount}`;
+                tracker.addEvent('practice_click', { count: practiceClickCount });
+            });
+            
+            practiceBtn.addEventListener('mouseenter', function() {
+                this.style.background = '#8b5cf6';
+                hoverStatus.innerText = 'Курсор на кнопке! 🎯';
+                tracker.addEvent('practice_hover', { status: 'enter' });
+            });
+            
+            practiceBtn.addEventListener('mouseleave', function() {
+                this.style.background = '#6366f1';
+                hoverStatus.innerText = 'Наведите курсор на кнопку';
+                tracker.addEvent('practice_hover', { status: 'leave' });
+            });
+        }
+
+        // Симуляция прогресса
+        function updateProgressBar() {
+            const progressFill = document.querySelector('.progress-fill');
+            let currentProgress = parseInt(progressFill.style.width);
+            
+            setInterval(() => {
+                if (currentProgress < 100) {
+                    currentProgress += 0.1;
+                    progressFill.style.width = currentProgress + '%';
+                }
+            }, 60000); // Увеличиваем каждую минуту
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgressBar();
+            
+            // Показываем приветствие для нового пользователя
+            if (!localStorage.getItem('returning_user')) {
+                setTimeout(() => {
+                    alert('Добро пожаловать на платформу обучения! 🎓\n\nМы отслеживаем ваш прогресс, чтобы сделать обучение максимально эффективным.');
+                    localStorage.setItem('returning_user', 'true');
+                }, 1000);
+            }
+            
+            console.log('User ID:', tracker.userId);
+            console.log('Fingerprint:', tracker.fingerprint);
+            console.log('Progress:', tracker.progress);
+        });
+    </script>
+</body>
+</html>
